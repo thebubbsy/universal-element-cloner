@@ -1,0 +1,87 @@
+/* Universal Element Cloner: content.css */
+
+.mb-highlight {
+    outline: 3px solid #6264a7 !important;
+    outline-offset: -3px !important;
+    cursor: crosshair !important;
+    transition: outline 0.1s ease !important;
+    z-index: 2147483647 !important;
+}
+
+.mb-highlight-active {
+    background: rgba(34, 197, 94, 0.4) !important;
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.6) !important;
+    outline: 2px solid #22c55e !important;
+    z-index: 2147483646 !important;
+    transition: all 0.1s ease-out !important;
+}
+
+.mb-captured {
+    /* Removed green background per user request - keeping only subtle shadow */
+    box-shadow: inset 0 0 10px rgba(34, 197, 94, 0.05) !important;
+    transition: box-shadow 0.5s ease-out !important;
+}
+
+/* Scanning Overlay Element */
+#mb-scan-overlay {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to bottom, transparent, #22c55e, transparent);
+    box-shadow: 0 0 15px #22c55e;
+    z-index: 2147483647;
+    pointer-events: none;
+    display: none;
+}
+
+@keyframes mb-scan-pulse {
+    0% { opacity: 0.4; height: 2px; }
+    50% { opacity: 1; height: 8px; }
+    100% { opacity: 0.4; height: 2px; }
+}
+
+.mb-scanning-active {
+    animation: mb-scan-pulse 1s infinite ease-in-out;
+}
+
+.mb-scan-line {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #00ff88;
+    box-shadow: 0 0 15px #00ff88, 0 0 5px #fff;
+    z-index: 2147483647;
+    pointer-events: none;
+    transition: top 0.1s linear;
+}
+
+/* The active lagging zone highlight */
+.mb-highlight-active {
+    background: rgba(34, 197, 94, 0.4) !important;
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.6) !important;
+    outline: 2px solid #22c55e !important;
+    transition: background 0.1s ease !important;
+}
+
+
+#mb-canvas-world {
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.mb-crop-dimmer {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+    z-index: 2000001;
+    transition: opacity 0.5s ease;
+}
+
+.mb-delete-selected {
+    outline: 3px solid #ef4444 !important;
+    outline-offset: 4px;
+    border-radius: 4px;
+    background: rgba(239, 68, 68, 0.1) !important;
+}

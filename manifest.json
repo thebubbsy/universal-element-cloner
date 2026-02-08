@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "Universal Element Cloner",
+  "version": "1.0",
+  "description": "High-fidelity DOM element cloner with auto-scroll and style freezing. Built with JavaScript ES6+, Chrome Extension Manifest V3, and Vanilla CSS/HTML. Matthew Bubb | linkedin.com/in/matthew-bubb-6346b8116",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "downloads",
+    "scripting",
+    "sidePanel"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Open Selection Panel"
+  },
+  "side_panel": {
+    "default_path": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

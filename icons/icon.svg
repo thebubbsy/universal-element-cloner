@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Dark background with rounded corners -->
+  <rect width="128" height="128" fill="#1a1a1a" rx="24"/>
+  
+  <!-- Layered rectangles representing cloning - back layer (blue, more transparent) -->
+  <rect x="30" y="38" width="50" height="50" fill="none" stroke="#0051C3" stroke-width="3" rx="3" opacity="0.5"/>
+  
+  <!-- Middle layer (blue, semi-transparent) -->
+  <rect x="38" y="30" width="50" height="50" fill="none" stroke="#0051C3" stroke-width="3" rx="3" opacity="0.7"/>
+  
+  <!-- Front layer (green accent - the "cloned" element) -->
+  <rect x="46" y="38" width="50" height="50" fill="none" stroke="#22c55e" stroke-width="4" rx="3"/>
+  
+  <!-- Selection cursor dot -->
+  <circle cx="52" cy="44" r="6" fill="#22c55e"/>
+</svg>
