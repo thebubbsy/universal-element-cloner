@@ -410,6 +410,10 @@ class UniversalScraper {
     captureSnapshot() {
         // Find children that look like items
         // Heuristic: Direct children or children with specific roles/classes
+        if (!this.targetElement || !this.targetElement.children) {
+            console.warn('FullPageScraper: Target element or children not available');
+            return;
+        }
         const items = this.targetElement.children;
         for (const item of items) {
             this.processElement(item);
