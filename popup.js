@@ -60,18 +60,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentEditMode = 'none';
 
-    // Message passing to content script
+    // Message passing to content script with injection fallback
     const sendMessage = async (action, data = {}) => {
         try {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
             if (!tab || !tab.id) {
                 console.warn('No active tab found');
+                if (statusText) statusText.innerText = 'Error: No active tab';
                 return;
             }
-            return await chrome.tabs.sendMessage(tab.id, { action, ...data });
+            
+            // Try to send message
+            try {
+                return await chrome.tabs.sendMessage(tab.id, { action, ...data });
+            } catch (connectionError) {
+                // Content script not loaded yet - inject it
+                console.log('Content script not loaded, attempting injection...');
+                
+                try {
+                    await chrome.scripting.insertCSS({
+                        target: { tabId: tab.id },
+                        files: ['content.css']
+                    });
+                    
+                    await chrome.scripting.executeScript({
+                        target: { tabId: tab.id },
+                        files: ['content.js']
+                    });
+                    
+                    // Wait a moment for script to initialize
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // Retry sending message
+                    return await chrome.tabs.sendMessage(tab.id, { action, ...data });
+                } catch (injectError) {
+                    console.error('Failed to inject content script:', injectError);
+                    if (statusText) statusText.innerText = 'Error: Cannot access page. Try reloading.';
+                }
+            }
         } catch (error) {
             console.error('Connection error:', action, error.message);
-            if (statusText) statusText.innerText = 'Connection Error: Refresh Page';
+            if (statusText) statusText.innerText = `Error: ${error.message}`;
         }
     };
 
