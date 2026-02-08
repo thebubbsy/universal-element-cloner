@@ -153,6 +153,13 @@ class UniversalScraper {
                 case 'EXIT_FILTER_MODE':
                     this.exitFilterMode();
                     break;
+                case 'EXPORT_ELEMENTS_START':
+                    this.enablePicker('multi');
+                    this.updateStatus('Click elements to export (Shift+Scroll to cycle depth)', true);
+                    break;
+                case 'PICK_ADDITIONAL_ELEMENT':
+                    this.pickAdditionalElement();
+                    break;
             }
         });
     }
@@ -335,6 +342,7 @@ class UniversalScraper {
 
         this.updateStatus("Scraping started...", true);
         this.startScanning();
+        this.startAnimationLoop(); // Ensure feedback starts
         this.captureLoop(speed);
     }
 
@@ -410,10 +418,20 @@ class UniversalScraper {
     captureSnapshot() {
         // Find children that look like items
         // Heuristic: Direct children or children with specific roles/classes
-        if (!this.targetElement || !this.targetElement.children) {
-            console.warn('FullPageScraper: Target element or children not available');
+        if (!this.targetElement) {
+            console.warn('FullPageScraper: No target element defined for captureSnapshot');
+            this.targetElement = document.body;
+        }
+        
+        if (!this.targetElement.children || this.targetElement.children.length === 0) {
+            console.warn(`FullPageScraper: Target <${this.targetElement.tagName}> has no children to capture.`);
+            // If it's the body and empty (unlikely but possible during transitions), or if it's a specific element we picked
+            if (this.targetElement !== document.body) {
+                this.processElement(this.targetElement);
+            }
             return;
         }
+
         const items = this.targetElement.children;
         for (const item of items) {
             this.processElement(item);
@@ -471,13 +489,13 @@ class UniversalScraper {
         this.isScanning = true;
         this.pendingElements = [];
         
-        // Setup Scan Line
-        if (!this.scanLine) {
-            this.scanLine = document.createElement('div');
-            this.scanLine.className = 'mb-scan-line';
-            document.body.appendChild(this.scanLine);
+        // Setup Scan Overlay
+        if (!this.scanOverlay) {
+            this.scanOverlay = document.createElement('div');
+            this.scanOverlay.className = 'mb-scan-line'; // Re-use class for styles
+            document.body.appendChild(this.scanOverlay);
         }
-        this.scanLine.style.display = 'block';
+        this.scanOverlay.style.display = 'block';
         
         // Initial Reveal Line Position
         const viewportBottom = window.scrollY + window.innerHeight;
@@ -497,7 +515,7 @@ class UniversalScraper {
 
     stopScanning() {
         this.isScanning = false;
-        if (this.scanLine) this.scanLine.style.display = 'none';
+        if (this.scanOverlay) this.scanOverlay.style.display = 'none';
         // Reveal all remaining pending elements instantly
         this.pendingElements.forEach(item => {
             if (!item.captured) {
@@ -564,14 +582,14 @@ class UniversalScraper {
             }
         });
 
-        // Update Scan Line Position
-        if (this.scanLine) {
+        // Update Scan Overlay Position
+        if (this.scanOverlay) {
             const relY = this.revealLineY - currentY;
-            this.scanLine.style.top = relY + 'px';
+            this.scanOverlay.style.top = relY + 'px';
             if (relY < -50 || relY > window.innerHeight + 50) {
-                this.scanLine.style.opacity = '0';
+                this.scanOverlay.style.opacity = '0';
             } else {
-                this.scanLine.style.opacity = '1';
+                this.scanOverlay.style.opacity = '1';
             }
         }
     }
@@ -822,12 +840,14 @@ class UniversalScraper {
         // Full page is always top-to-bottom standard
         this.direction = 'down';
         
-        // Detect scrollable containers
+        // Detect scrollable containers - ROBUST DETECTION
         this.scrollables = [window, ...Array.from(document.querySelectorAll('*')).filter(el => {
+            if (el.id?.startsWith('mb-')) return false; // Ignore own UI
             const style = window.getComputedStyle(el);
-            return el.scrollHeight > 1000 && 
-                   (style.overflow === 'auto' || style.overflow === 'scroll' || 
-                    style.overflowY === 'auto' || style.overflowY === 'scroll');
+            const isScrollable = (style.overflow === 'auto' || style.overflow === 'scroll' || 
+                                 style.overflowY === 'auto' || style.overflowY === 'scroll');
+            const hasScrollContent = el.scrollHeight > el.clientHeight + 10;
+            return isScrollable && hasScrollContent;
         })];
 
         this.scrollListeners = [];
@@ -1048,17 +1068,6 @@ class UniversalScraper {
             .mb-export-selected { outline: 3px solid #10b981 !important; outline-offset: 4px; border-radius: 4px; }
         `;
         document.head.appendChild(style);
-
-        this.updateCanvasTransform();
-        this.initEventListeners();
-        // Remove the separate sendMessage reply since UI handles it now? 
-        // Or keep it for popup sync. Keeping it.
-        chrome.runtime.sendMessage({ action: 'OPEN_SIDE_EDITOR_REPLY' });
-        this.syncFilterState();
-    }
-
-    updateCanvasTransform() {
-        this.canvasWorld.style.transform = `translate(${this.canvasState.x}px, ${this.canvasState.y}px) scale(${this.canvasState.scale})`;
     }
 
     initEventListeners() {
