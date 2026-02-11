@@ -113,6 +113,7 @@ class UniversalScraper {
 
     bindEvents() {
         chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+            let isAsync = false;
             switch (msg.action) {
                 case 'START_SCRAPE':
                     this.startScraping(msg.speed, msg.direction);
@@ -160,7 +161,13 @@ class UniversalScraper {
                 case 'PICK_ADDITIONAL_ELEMENT':
                     this.pickAdditionalElement();
                     break;
+                // Add any async cases here and set isAsync = true
             }
+            if (!isAsync) {
+                sendResponse({ success: true }); // Acknowledge receipt
+                return false; // Close channel immediately for sync actions
+            }
+            return true; // Keep open for async
         });
     }
 
@@ -682,12 +689,21 @@ class UniversalScraper {
             };
 
             if (target.tagName === 'IMG') {
-                const absSrc = ensureAbsolute(source.src);
+                const absSrc = ensureAbsolute(source.currentSrc || source.src); // Use currentSrc if available (responsive images)
                 target.src = absSrc; // Set initial absolute URL
                 target.dataset.originalSrc = absSrc; // Cache location
                 
+                // FORCE EAGER LOADING for clone
+                target.loading = 'eager';
+                target.removeAttribute('loading'); // Some browsers prefer removal
+                
+                // If it was lazy loaded and hasn't loaded yet, it might be a placeholder.
+                // We try to grab the real src from data attributes if common patterns exist
+                if (source.dataset.src) target.src = ensureAbsolute(source.dataset.src);
+                if (source.dataset.srcset) target.srcset = source.dataset.srcset; // We should probably sanitize this too but it's complex
+
                 // Fire and forget conversion
-                embedImage(absSrc, (b64) => { target.src = b64; });
+                embedImage(absSrc, (b64) => { target.src = b64; target.srcset = ''; });
             }
             
             const bg = window.getComputedStyle(source).backgroundImage;
@@ -1068,6 +1084,7 @@ class UniversalScraper {
             .mb-export-selected { outline: 3px solid #10b981 !important; outline-offset: 4px; border-radius: 4px; }
         `;
         document.head.appendChild(style);
+        this.initEventListeners();
     }
 
     initEventListeners() {
@@ -1887,14 +1904,15 @@ class UniversalScraper {
     async urlToBase64(url) {
         if (url.startsWith('data:')) return url;
         try {
-            const response = await fetch(url);
-            const blob = await response.blob();
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
+            const response = await chrome.runtime.sendMessage({ action: 'FETCH_IMAGE_BASE64', url });
+            if (chrome.runtime.lastError) {
+                // Suppress error
+                return null;
+            }
+            if (response && response.success) {
+                return response.data;
+            }
+            return null;
         } catch (e) { return null; }
     }
 
