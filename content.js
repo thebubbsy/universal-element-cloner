@@ -1938,4 +1938,4 @@ class UniversalScraper {
 }
 
 // Initialize
-const scraper = new UniversalScraper();
+if (typeof module !== "undefined" && module.exports) { module.exports = UniversalScraper; } else { const scraper = new UniversalScraper(); }
