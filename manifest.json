@@ -25,7 +25,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "js": ["utils.js", "picker.js", "scraper.js", "editor.js", "exporter.js", "content.js"],
       "css": ["content.css"],
       "all_frames": true,
       "match_about_blank": true
