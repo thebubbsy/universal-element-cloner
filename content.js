@@ -16,7 +16,7 @@ class UniversalScraper {
         this.assetCache = new Map(); // Global cache for base64 -> ObjectURL
         this.observer = null;
         this.direction = 'down'; // 'down' or 'up'
-        
+
         // Filter Mode State
         this.isFiltering = false;
         this.editMode = 'none'; // 'delete', 'move', 'resize', 'none'
@@ -34,7 +34,7 @@ class UniversalScraper {
         this.isGuidedMode = false;
         this.scrollables = [];
         this.scrollListeners = [];
-        
+
         // --- ANIMATION / FEEDBACK STATE ---
         this.lastScrollY = window.scrollY;
         this.lastScrollTime = Date.now();
@@ -45,7 +45,7 @@ class UniversalScraper {
         this.isScanning = false;
         this.scrapingSpeed = 0;
         this._scrapeStartTime = 0;
-        
+
         this.cropState = {
             active: false,
             startX: 0,
@@ -56,14 +56,14 @@ class UniversalScraper {
         };
         this.cropBox = null; // {x, y, w, h} relative to world
         this.isCropping = false;
-        
+
         // Export Selection State
         this.exportSelection = new Set();
         this.isExportSelectMode = false;
-        
+
         // Delete Selection State
         this.deleteSelection = new Set();
-        
+
         this.initUniversalHandlers();
         this.bindEvents();
     }
@@ -74,15 +74,15 @@ class UniversalScraper {
                 // UNIVERSAL DEPTH CYCLING
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 if (this.depthStack && this.depthStack.length > 1) {
                     if (e.deltaY > 0) this.depthIndex = (this.depthIndex + 1) % this.depthStack.length;
                     else this.depthIndex = (this.depthIndex - 1 + this.depthStack.length) % this.depthStack.length;
-                    
-                    const highlightClass = this.isFiltering 
+
+                    const highlightClass = this.isFiltering
                         ? (this.editMode === 'delete' ? 'mb-hover-delete' : (this.editMode === 'none' ? 'mb-highlight' : `mb-hover-${this.editMode}`))
                         : 'mb-highlight';
-                        
+
                     this.updateDepthHighlight(highlightClass);
                 }
                 return;
@@ -178,13 +178,13 @@ class UniversalScraper {
         this._hoverHandler = (e) => {
             // IGNORE OWN UI
             if (e.target.id === 'mb-picker-done' || e.target.closest('#mb-canvas-toolbar') || e.target.closest('#mb-canvas-minimap')) return;
-            
+
             e.stopPropagation();
-            
+
             // Populate depth stack for the current point
             this.depthStack = document.elementsFromPoint(e.clientX, e.clientY)
                 .filter(node => node.nodeType === 1 && !node.id?.startsWith('mb-') && !node.closest('[id^="mb-"]'));
-            
+
             this.depthIndex = 0;
             const el = this.depthStack[this.depthIndex] || e.target;
 
@@ -193,17 +193,17 @@ class UniversalScraper {
             this.highlightedElement = el;
             el.classList.add('mb-highlight');
         };
-        
+
         this._clickHandler = (e) => {
              // IGNORE OWN UI (Let default click happen)
             if (e.target.id === 'mb-picker-done' || e.target.closest('#mb-canvas-toolbar') || e.target.closest('#mb-canvas-minimap')) return;
 
             e.preventDefault();
             e.stopPropagation();
-            
+
             // Use current cycled element if shift-scrolled
             const target = (this.highlightedDepthElement && this.pickerActive) ? this.highlightedDepthElement : e.target;
-            
+
             // Toggle highlight on live element
             if (target.classList.contains('mb-selected')) {
                 target.classList.remove('mb-selected');
@@ -214,7 +214,7 @@ class UniversalScraper {
                 this.multiCaptureQueue.push(target);
                 this.targetElement = target; // Set as scraper target
             }
-            
+
             this.updateStatus(`Selected ${this.multiCaptureQueue.length} elements. Ready to Scrape or Finish.`, true);
         };
 
@@ -230,14 +230,14 @@ class UniversalScraper {
         this.pickerMode = 'multi';
         this.multiCaptureQueue = [];
         this.enablePicker('multi');
-        
+
         // Inject Selection Styles if they don't exist
         if (!document.getElementById('mb-selection-styles')) {
             const style = document.createElement('style');
             style.id = 'mb-selection-styles';
             style.innerHTML = `
-                .mb-highlight { 
-                    outline: 2px solid #0051C3 !important; 
+                .mb-highlight {
+                    outline: 2px solid #0051C3 !important;
                     outline-offset: -2px !important;
                     background: rgba(0, 81, 195, 0.1) !important;
                     cursor: pointer !important;
@@ -247,8 +247,8 @@ class UniversalScraper {
                     box-shadow: 0 0 15px rgba(34, 197, 94, 0.6) !important;
                     outline: 2px solid #22c55e !important;
                 }
-                .mb-selected { 
-                    outline: 3px solid #22c55e !important; 
+                .mb-selected {
+                    outline: 3px solid #22c55e !important;
                     outline-offset: -3px !important;
                     box-shadow: 0 0 15px rgba(34, 197, 94, 0.6) !important;
                     background: rgba(34, 197, 94, 0.05) !important;
@@ -263,12 +263,12 @@ class UniversalScraper {
         document.removeEventListener('mouseover', this._hoverHandler, true);
         document.removeEventListener('click', this._clickHandler, true);
         if (this._wheelHandler) document.removeEventListener('wheel', this._wheelHandler, { passive: false });
-        
+
         if (this.highlightedDepthElement) {
             this.highlightedDepthElement.classList.remove('mb-highlight');
             this.highlightedDepthElement = null;
         }
-        
+
         if (clean) {
             document.querySelectorAll('.mb-highlight, .mb-selected').forEach(el => {
                 el.classList.remove('mb-highlight', 'mb-selected');
@@ -314,10 +314,10 @@ class UniversalScraper {
         container.style.gap = '20px';
         container.style.padding = '40px';
         container.classList.add('mb-multi-container');
-        
+
         fragments.forEach(f => container.appendChild(f));
         this.setupFilterContainer(container);
-        
+
         // Reset buffers
         this.multiCaptureQueue = [];
         this.capturedItems = [];
@@ -335,7 +335,7 @@ class UniversalScraper {
         this.scrapingSpeed = speed;
         this.capturedItems = [];
         this.seenHashes.clear();
-        
+
         // Dynamic Content Detection
         this.observer = new MutationObserver((mutations) => {
             if (!this.scraping) return;
@@ -367,16 +367,16 @@ class UniversalScraper {
 
         if (speed > 0) {
             const scrollAmt = this.direction === 'up' ? -300 : 300;
-            
+
             // ROBUST SCROLL: Find the true scrollable container
             const scroller = this.findScrollableAncestor(this.targetElement);
-            
+
             if (scroller) {
                 scroller.scrollBy({ top: scrollAmt, behavior: 'smooth' });
             } else {
                 window.scrollBy({ top: scrollAmt, behavior: 'smooth' });
             }
-            
+
             await new Promise(r => setTimeout(r, 1000)); // Wait for render or lazy-load
             this.captureLoop(speed);
         }
@@ -384,7 +384,7 @@ class UniversalScraper {
 
     startAnimationLoop() {
         if (!this.scraping) return;
-        
+
         if (this.scanOverlay) {
             const rect = this.targetElement.getBoundingClientRect();
             if (this.scrapingSpeed === 0) {
@@ -404,7 +404,7 @@ class UniversalScraper {
                 this.scanOverlay.style.height = '8px'; // Thicker scanning zone when moving
             }
         }
-        
+
         requestAnimationFrame(() => this.startAnimationLoop());
     }
 
@@ -429,7 +429,7 @@ class UniversalScraper {
             console.warn('FullPageScraper: No target element defined for captureSnapshot');
             this.targetElement = document.body;
         }
-        
+
         if (!this.targetElement.children || this.targetElement.children.length === 0) {
             console.warn(`FullPageScraper: Target <${this.targetElement.tagName}> has no children to capture.`);
             // If it's the body and empty (unlikely but possible during transitions), or if it's a specific element we picked
@@ -448,7 +448,7 @@ class UniversalScraper {
     processElement(el) {
         // Skip hidden or non-content elements
         if (el.offsetWidth <= 0 || el.offsetHeight <= 0) return;
-        
+
         // STRICT SKIP: If it has been captured or is inside a captured parent, skip it.
         if (el !== this.targetElement && (el.classList.contains('mb-captured') || el.closest('.mb-captured'))) return;
 
@@ -459,13 +459,13 @@ class UniversalScraper {
 
         // High Fidelity Clone
         const clone = this.freezeStyles(el);
-        
+
         // Final Clean
         clone.classList.remove('mb-captured', 'mb-highlight');
         Array.from(clone.querySelectorAll('.mb-captured, .mb-highlight')).forEach(c => {
             c.classList.remove('mb-captured', 'mb-highlight');
         });
-        
+
         const itemObj = { html: clone.outerHTML, hash: hash };
 
         if (this.direction === 'up') {
@@ -495,7 +495,7 @@ class UniversalScraper {
         if (this.isScanning) return;
         this.isScanning = true;
         this.pendingElements = [];
-        
+
         // Setup Scan Overlay
         if (!this.scanOverlay) {
             this.scanOverlay = document.createElement('div');
@@ -503,15 +503,15 @@ class UniversalScraper {
             document.body.appendChild(this.scanOverlay);
         }
         this.scanOverlay.style.display = 'block';
-        
+
         // Initial Reveal Line Position
         const viewportBottom = window.scrollY + window.innerHeight;
         const viewportTop = window.scrollY;
-        
+
         this.revealLineY = this.direction === 'up' ? viewportBottom : viewportTop;
         this.lastScrollY = window.scrollY;
         this.lastScrollTime = Date.now();
-        
+
         const loop = () => {
             if (!this.isScanning) return;
             this.updateScanning();
@@ -537,19 +537,19 @@ class UniversalScraper {
         const currentY = window.scrollY;
         const dt = now - this.lastScrollTime;
         const dy = currentY - this.lastScrollY;
-        
+
         // Update velocity (px/ms)
         if (dt > 0) {
             const instantVelocity = dy / dt;
             this.scrollVelocity = (this.scrollVelocity * 0.8) + (instantVelocity * 0.2); // Smoothed
         }
-        
+
         this.lastScrollY = currentY;
         this.lastScrollTime = now;
 
         const viewportTop = currentY;
         const viewportBottom = currentY + window.innerHeight;
-        
+
         if (this.direction === 'up') {
             let targetY = viewportBottom;
             if (this.scrollVelocity < -0.2) { // Scrolling UP quickly
@@ -571,7 +571,7 @@ class UniversalScraper {
         // Apply Reveal
         this.pendingElements.forEach(item => {
             if (item.captured) return;
-            
+
             let shouldReveal = false;
             if (this.direction === 'up') {
                 if (this.revealLineY <= (item.absY + item.height)) shouldReveal = true;
@@ -611,7 +611,7 @@ class UniversalScraper {
             .join(".");
         const attrs = Array.from(el.attributes).map(a => `${a.name}:${a.value}`).join("|");
         const structure = Array.from(el.children).map(c => c.tagName).join("-");
-        
+
         const raw = `${text}_${id}_${cls}_${attrs}_${structure}`;
         // Basic Djb2 hash replacement for simplicity in content script
         let hash = 5381;
@@ -633,23 +633,23 @@ class UniversalScraper {
             node.classList.remove('mb-captured', 'mb-highlight', 'mb-selected');
             for (let child of node.children) cleanup(child);
         };
-        
+
         // We need to restore them after cloning, so we'll just remove them from the clone afterwards if we want
         // But better is to remove from source, clone, then restore source.
         const selectedElements = Array.from(el.querySelectorAll('.mb-selected')).concat(el.classList.contains('mb-selected') ? [el] : []);
         const highlightedElements = Array.from(el.querySelectorAll('.mb-highlight')).concat(el.classList.contains('mb-highlight') ? [el] : []);
-        
+
         el.classList.remove('mb-captured', 'mb-highlight', 'mb-selected');
         el.querySelectorAll('.mb-captured, .mb-highlight, .mb-selected').forEach(node => {
             node.classList.remove('mb-captured', 'mb-highlight', 'mb-selected');
         });
 
         const clone = el.cloneNode(true);
-        
+
         // Restore highlights to live source
         selectedElements.forEach(node => node.classList.add('mb-selected'));
         highlightedElements.forEach(node => node.classList.add('mb-highlight'));
-        
+
         const assetMap = new Map(); // Local deduping for this element tree
 
         const processImage = (target, source) => {
@@ -667,7 +667,7 @@ class UniversalScraper {
                     return url;
                 }
             };
-            
+
             // IMMEDIATE CAPTURE & EMBED
             const embedImage = async (url, setter) => {
                 if (!url || url.startsWith('data:')) return;
@@ -677,7 +677,7 @@ class UniversalScraper {
                         setter(this.assetCache.get(url));
                         return;
                     }
-                    
+
                     const b64 = await this.urlToBase64(url);
                     if (b64) {
                         this.assetCache.set(url, b64);
@@ -692,11 +692,11 @@ class UniversalScraper {
                 const absSrc = ensureAbsolute(source.currentSrc || source.src); // Use currentSrc if available (responsive images)
                 target.src = absSrc; // Set initial absolute URL
                 target.dataset.originalSrc = absSrc; // Cache location
-                
+
                 // FORCE EAGER LOADING for clone
                 target.loading = 'eager';
                 target.removeAttribute('loading'); // Some browsers prefer removal
-                
+
                 // If it was lazy loaded and hasn't loaded yet, it might be a placeholder.
                 // We try to grab the real src from data attributes if common patterns exist
                 if (source.dataset.src) target.src = ensureAbsolute(source.dataset.src);
@@ -705,7 +705,7 @@ class UniversalScraper {
                 // Fire and forget conversion
                 embedImage(absSrc, (b64) => { target.src = b64; target.srcset = ''; });
             }
-            
+
             const bg = window.getComputedStyle(source).backgroundImage;
             if (bg && bg !== 'none') {
                 const urlMatch = bg.match(/url\(["']?([^"']+)["']?\)/);
@@ -722,7 +722,7 @@ class UniversalScraper {
         const applyComputed = (source, target) => {
             if (source.nodeType !== 1) return;
             const comp = window.getComputedStyle(source);
-            
+
             // Comprehensive properties for pixel-perfect fidelity
             const props = [
                 'display', 'position', 'top', 'left', 'right', 'bottom',
@@ -752,7 +752,7 @@ class UniversalScraper {
                 if (p === 'overflow' || p === 'overflowX' || p === 'overflowY') {
                     if (val === 'auto' || val === 'scroll') {
                         // If it's the main target, keep it if it's the root container, otherwise make it visible
-                        val = 'visible'; 
+                        val = 'visible';
                     }
                 }
 
@@ -770,14 +770,14 @@ class UniversalScraper {
                 if (pComp.content && pComp.content !== 'none' && pComp.content !== '""') {
                     const span = document.createElement('span');
                     span.innerText = pComp.content.replace(/^"|"$/g, '');
-                    
+
                     // Copy prominent pseudo-styles
                     ['position', 'display', 'color', 'background', 'width', 'height', 'top', 'left', 'right', 'bottom', 'margin', 'padding', 'border', 'borderRadius', 'fontSize', 'fontWeight'].forEach(k => {
                         const v = pComp[k];
                         if (k === 'background' && (v.includes('rgba(0, 255, 136') || v.includes('0, 255, 136'))) return;
                         span.style[k] = v;
                     });
-                    
+
                     span.style.pointerEvents = 'none';
                     if (type === '::before') target.prepend(span);
                     else target.append(span);
@@ -806,7 +806,7 @@ class UniversalScraper {
     exportResults() {
         const uniqueItems = [];
         const seen = new Set();
-        
+
         this.capturedItems.forEach(item => {
             if (!seen.has(item.hash)) {
                 seen.add(item.hash);
@@ -817,17 +817,17 @@ class UniversalScraper {
         const html = this.assembleExport(uniqueItems.join('\n'));
         this.downloadFile(html, `universal-export-${Date.now()}.html`);
     }
-    
+
     assembleExport(content) {
         // Create a temporary container to process the content
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = content;
-        
+
         // Sanitize all iframes in the content
         tempDiv.querySelectorAll('iframe').forEach(iframe => {
             this.sanitizeIframe(iframe);
         });
-        
+
         // Assemble the final HTML document
         return `<!DOCTYPE html>
 <html>
@@ -855,12 +855,12 @@ class UniversalScraper {
 
         // Full page is always top-to-bottom standard
         this.direction = 'down';
-        
+
         // Detect scrollable containers - ROBUST DETECTION
         this.scrollables = [window, ...Array.from(document.querySelectorAll('*')).filter(el => {
             if (el.id?.startsWith('mb-')) return false; // Ignore own UI
             const style = window.getComputedStyle(el);
-            const isScrollable = (style.overflow === 'auto' || style.overflow === 'scroll' || 
+            const isScrollable = (style.overflow === 'auto' || style.overflow === 'scroll' ||
                                  style.overflowY === 'auto' || style.overflowY === 'scroll');
             const hasScrollContent = el.scrollHeight > el.clientHeight + 10;
             return isScrollable && hasScrollContent;
@@ -873,7 +873,7 @@ class UniversalScraper {
             const scrollersInfo = this.scrollables.map((s, idx) => {
                 let progress = 0;
                 let name = s === window ? "Main Window" : `${s.tagName.toLowerCase()}#${s.id || idx}`;
-                
+
                 if (s === window) {
                     const scrollPos = window.scrollY + window.innerHeight;
                     const totalHeight = document.documentElement.scrollHeight;
@@ -888,7 +888,7 @@ class UniversalScraper {
             });
 
             const avgProgress = Math.round(totalProgress / this.scrollables.length);
-            
+
             chrome.runtime.sendMessage({
                 action: 'GUIDED_PROGRESS',
                 progress: avgProgress,
@@ -920,45 +920,45 @@ class UniversalScraper {
 
         this.isFiltering = true;
         this.originalBody = document.body;
-        
+
         // Save current scroll position
         this._savedScroll = { x: window.scrollX, y: window.scrollY };
-        
+
         // Hide original page content
         this.originalBody.style.display = 'none';
-        
+
         // --- INFINITE CANVAS SETUP ---
         // Viewport: Fixed window into the world
         this.filterContainer = document.createElement('div');
         this.filterContainer.id = 'mb-canvas-viewport';
         this.filterContainer.style = `
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #121212; z-index: 2000000; overflow: hidden; 
+            background: #121212; z-index: 2000000; overflow: hidden;
             font-family: inherit; cursor: grab; user-select: none;
             background-image: radial-gradient(#333 1px, transparent 1px);
             background-size: 30px 30px;
         `;
-        
+
         // World: The surface
         this.canvasWorld = document.createElement('div');
         this.canvasWorld.id = 'mb-canvas-world';
         this.canvasWorld.style = `
-            position: absolute; top: 0; left: 0; 
+            position: absolute; top: 0; left: 0;
             width: 10000px; height: 10000px;
             transform-origin: 0 0;
             will-change: transform;
         `;
-        
+
         // Canvas Paper area (Visual helper)
         this.canvasPaper = document.createElement('div');
         this.canvasPaper.id = 'mb-canvas-paper';
         this.canvasPaper.style = `
-            position: absolute; background: white; 
+            position: absolute; background: white;
             box-shadow: 0 0 100px rgba(0,0,0,0.5);
             pointer-events: none;
         `;
         this.canvasWorld.appendChild(this.canvasPaper);
-        
+
         // Initial State
         this.canvasState = {
             x: 0,
@@ -971,7 +971,7 @@ class UniversalScraper {
 
         this.canvasWorld.appendChild(clone);
         this.filterContainer.appendChild(this.canvasWorld);
-        
+
         // --- TOOLBAR UI ---
         this.toolbar = document.createElement('div');
         this.toolbar.id = 'mb-canvas-toolbar';
@@ -1026,7 +1026,7 @@ class UniversalScraper {
         this.filterContainer.appendChild(this.minimap);
 
         document.documentElement.appendChild(this.filterContainer);
-        
+
         // Inject Canvas Styles
         const style = document.createElement('style');
         style.id = 'mb-filter-styles';
@@ -1039,7 +1039,7 @@ class UniversalScraper {
             .mb-resizable { resize: both !important; overflow: auto !important; min-width: 20px; min-height: 20px; pointer-events: auto !important; }
             .mb-dragging { opacity: 0.5 !important; pointer-events: none !important; }
             #mb-canvas-viewport:active { cursor: grabbing; }
-            
+
             #mb-canvas-world {
                 transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
                 will-change: transform;
@@ -1124,20 +1124,20 @@ class UniversalScraper {
             if (this.editMode === 'none' || this.canvasState.isPanning) return;
             const el = e.target;
             if (el === this.filterContainer || el === this.canvasWorld) return;
-            
+
             // Highlight based on mode
-            const cls = (this.editMode === 'delete') ? 'mb-hover-delete' : 
-                        (this.editMode === 'move') ? 'mb-hover-move' : 
+            const cls = (this.editMode === 'delete') ? 'mb-hover-delete' :
+                        (this.editMode === 'move') ? 'mb-hover-move' :
                         (this.editMode === 'resize') ? 'mb-hover-resize' :
                         (this.editMode === 'export-pick') ? 'mb-hover-export' : '';
-            
+
             if (cls) el.classList.add(cls);
 
             // Always build depth stack in edit mode
             this.depthStack = document.elementsFromPoint(e.clientX, e.clientY)
                 .filter(node => this.canvasWorld.contains(node) && node !== this.canvasWorld);
             this.depthIndex = 0;
-            
+
             // If in move mode, we might want depth highlight, but for now just basic hover
             // this.updateDepthHighlight();
         };
@@ -1169,7 +1169,7 @@ class UniversalScraper {
                     this.deleteSelection.add(el);
                     el.classList.add('mb-delete-selected');
                 }
-                
+
                 // Show/hide delete button based on selection
                 const deleteBtn = document.getElementById('mb-btn-execute-delete');
                 if (deleteBtn) {
@@ -1197,7 +1197,7 @@ class UniversalScraper {
             if (el === this.filterContainer || el === this.canvasWorld) return;
 
             this.dragElement = el;
-            
+
             // Calculate offset relative to the element's top-left
             const rect = el.getBoundingClientRect();
             // We need to account for scale if we add zoom later, but for now scale is 1
@@ -1220,12 +1220,12 @@ class UniversalScraper {
 
         this._filterMove = (e) => {
             if (!this.dragElement) return;
-            
+
             // Calculate new position relative to WORLD origin
             // World coordinate = (Client Coordinate - World Translation) / Scale
             const worldX = (e.clientX - this.canvasState.x) / this.canvasState.scale;
             const worldY = (e.clientY - this.canvasState.y) / this.canvasState.scale;
-            
+
             this.dragElement.style.position = 'absolute';
             this.dragElement.style.left = (worldX - this.dragOffset.x) + 'px';
             this.dragElement.style.top = (worldY - this.dragOffset.y) + 'px';
@@ -1254,7 +1254,7 @@ class UniversalScraper {
 
                 // Move structurally and keeping the absolute position
                 dropParent.appendChild(this.dragElement);
-                
+
                 // Note: We keep the absolute position set in _filterMove
 
                 this.pushToUndo({
@@ -1332,7 +1332,7 @@ class UniversalScraper {
             // World Width approx 4000px? dynamic?
             // Better: Minimap represents the bounding box of the world content + padding
         });
-        
+
         // Initial Tool State
         this._updateToolState();
         this.updateMinimap();
@@ -1349,16 +1349,16 @@ class UniversalScraper {
         const bounds = this.calculateWorldBounds();
         const vw = window.innerWidth;
         const vh = window.innerHeight;
-        
+
         // Target 90% of screen size
         const scale = Math.min(
             (vw * 0.9) / bounds.width,
             (vh * 0.9) / bounds.height,
             1.5 // Don't zoom in too much
         );
-        
+
         this.setZoom(scale);
-        
+
         // Center it
         this.canvasState.x = (vw / 2) - (bounds.left + bounds.width / 2) * scale;
         this.canvasState.y = (vh / 2) - (bounds.top + bounds.height / 2) * scale;
@@ -1371,10 +1371,10 @@ class UniversalScraper {
         else if (this.editMode === 'move') document.getElementById('mb-tool-select').classList.add('active');
         else if (this.editMode === 'crop') document.getElementById('mb-tool-crop').classList.add('active');
         else if (this.editMode === 'export-pick') document.getElementById('mb-tool-export-pick').classList.add('active');
-        
+
         this.filterContainer.style.cursor = this.editMode === 'none' ? 'grab' : (this.editMode === 'crop' ? 'crosshair' : 'default');
         this.filterContainer.classList.toggle('cropping', this.editMode === 'crop');
-        
+
         // Cleanup selection highlights if switching away from export-pick
         if (this.editMode !== 'export-pick') {
             this.canvasWorld.querySelectorAll('.mb-export-selected').forEach(el => el.classList.remove('mb-export-selected'));
@@ -1382,7 +1382,7 @@ class UniversalScraper {
             const selBtn = document.getElementById('mb-btn-export-selection');
             if (selBtn) selBtn.style.display = 'none';
         }
-        
+
         // Cleanup delete selections if switching away from delete mode
         if (this.editMode !== 'delete') {
             this.canvasWorld.querySelectorAll('.mb-delete-selected').forEach(el => el.classList.remove('mb-delete-selected'));
@@ -1405,7 +1405,7 @@ class UniversalScraper {
         const bounds = this.calculateWorldBounds();
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        
+
         // Pad bounds slightly
         const padding = 100;
         const minX = viewportWidth - (bounds.right + padding) * this.canvasState.scale;
@@ -1441,7 +1441,7 @@ class UniversalScraper {
 
     updateMinimap() {
         if (!this.minimapView) return;
-        
+
         const bounds = this.calculateWorldBounds();
         // Visual Paper Feedback
         if (this.canvasPaper) {
@@ -1454,7 +1454,7 @@ class UniversalScraper {
         // Minimap Scaling
         const miniWidth = 200;
         const miniHeight = 150;
-        
+
         // We show a 3x larger area than content in the minimap for context
         const viewW = bounds.width * 2;
         const viewH = bounds.height * 2;
@@ -1466,12 +1466,12 @@ class UniversalScraper {
         };
 
         const scale = Math.min(miniWidth / viewW, miniHeight / viewH);
-        
+
         const vpW = window.innerWidth / this.canvasState.scale;
         const vpH = window.innerHeight / this.canvasState.scale;
         const vpX = -this.canvasState.x / this.canvasState.scale;
         const vpY = -this.canvasState.y / this.canvasState.scale;
-        
+
         const miniVpW = vpW * scale;
         const miniVpH = vpH * scale;
         const miniVpX = (vpX - worldBounds.left) * scale;
@@ -1512,7 +1512,7 @@ class UniversalScraper {
         } else if (action.type === 'move') {
             if (action.oldNextSibling) action.oldParent.insertBefore(action.element, action.oldNextSibling);
             else action.oldParent.appendChild(action.element);
-            
+
             action.element.style.top = action.oldStyle.top;
             action.element.style.left = action.oldStyle.left;
             action.element.style.position = action.oldStyle.position;
@@ -1538,7 +1538,7 @@ class UniversalScraper {
             action.element.classList.add('mb-resizable');
         } else if (action.type === 'move') {
             action.newParent.appendChild(action.element);
-            
+
             action.element.style.top = action.newStyle.top;
             action.element.style.left = action.newStyle.left;
             action.element.style.position = action.newStyle.position;
@@ -1547,10 +1547,10 @@ class UniversalScraper {
         }
         this.syncFilterState();
     }
-    
+
     executeDelete() {
         if (this.deleteSelection.size === 0) return;
-        
+
         // Create batch undo action for all deletions
         const deletions = [];
         this.deleteSelection.forEach(el => {
@@ -1558,23 +1558,23 @@ class UniversalScraper {
             const nextSibling = el.nextElementSibling;
             deletions.push({ element: el, parent, nextSibling });
         });
-        
+
         // Push batch to undo stack
         this.pushToUndo({ type: 'batch-delete', deletions });
-        
+
         // Remove all selected elements
         this.deleteSelection.forEach(el => {
             el.classList.remove('mb-delete-selected');
             el.remove();
         });
-        
+
         // Clear selection
         this.deleteSelection.clear();
-        
+
         // Hide delete button
         const deleteBtn = document.getElementById('mb-btn-execute-delete');
         if (deleteBtn) deleteBtn.style.display = 'none';
-        
+
         this.updateStatus(`Deleted ${deletions.length} element(s)`, true);
         this.syncFilterState();
     }
@@ -1583,7 +1583,7 @@ class UniversalScraper {
         // Temporarily show original body to pick from it
         this.originalBody.style.display = 'block';
         this.filterContainer.style.display = 'none';
-        
+
         this.enablePicker();
 
         // Inject Floating "Done" Button
@@ -1598,21 +1598,21 @@ class UniversalScraper {
             font-family: system-ui, sans-serif;
         `;
         document.body.appendChild(doneBtn);
-        
+
         const finishSelection = () => {
              // Only add if we have a target
             if (this.targetElement) {
                 const clone = this.freezeStyles(this.targetElement);
-                
+
                 // Position in center of canvas view
                 // Viewport Center X = -CanvasX + (ScreenWidth / 2)
                 const centerX = (-this.canvasState.x + window.innerWidth / 2) / this.canvasState.scale;
                 const centerY = (-this.canvasState.y + window.innerHeight / 2) / this.canvasState.scale;
-                
+
                 clone.style.position = 'absolute';
                 clone.style.left = centerX + 'px';
                 clone.style.top = centerY + 'px';
-                
+
                 this.canvasWorld.appendChild(clone);
                 this.pushToUndo({ type: 'add', element: clone, parent: this.canvasWorld });
             }
@@ -1640,9 +1640,9 @@ class UniversalScraper {
 
     async saveFinal(onlySelection = false) {
         this.updateStatus('Preparing export... Embedding images...', true);
-        
+
         let exportArea;
-        
+
         // If selection mode, override bounds to only cover selected elements
         if (onlySelection && this.exportSelection.size > 0) {
             let sL = Infinity, sT = Infinity, sR = -Infinity, sB = -Infinity;
@@ -1657,10 +1657,10 @@ class UniversalScraper {
         } else {
            exportArea = this.cropState.rect || this.calculateWorldBounds();
         }
-        
+
         // Deep Clone the World
         const finalWorld = this.canvasWorld.cloneNode(true);
-        
+
         // Cleanup UI markers from clone
         finalWorld.querySelectorAll('.mb-hover-delete, .mb-hover-move, .mb-hover-resize, .mb-dragging, .mb-resizable, .mb-crop-overlay, .mb-export-selected').forEach(el => {
             el.remove();
@@ -1670,10 +1670,10 @@ class UniversalScraper {
         if (onlySelection) {
             const originalSelection = Array.from(this.exportSelection);
             originalSelection.forEach(el => el.setAttribute('data-mb-export', 'true'));
-            
+
             const selectionWorld = this.canvasWorld.cloneNode(true);
             originalSelection.forEach(el => el.removeAttribute('data-mb-export'));
-            
+
             const keepNodes = [];
             const collect = (node) => {
                 if (node.nodeType === 1 && node.getAttribute('data-mb-export')) {
@@ -1682,33 +1682,33 @@ class UniversalScraper {
                 Array.from(node.children || []).forEach(collect);
             };
             collect(selectionWorld);
-            
+
             finalWorld.innerHTML = '';
             keepNodes.forEach(node => {
                 node.removeAttribute('data-mb-export');
                 finalWorld.appendChild(node);
             });
         }
-        
+
         // Remove selection highlights from any remaining elements (not strictly needed if we cleared finalWorld but good for safety)
         finalWorld.querySelectorAll('.mb-selected-export').forEach(el => el.classList.remove('mb-selected-export'));
-        
+
         // Wrapper for absolute positioning
         const wrapper = document.createElement('div');
         wrapper.style = `
-            position: relative; 
-            width: ${exportArea.width}px; 
-            height: ${exportArea.height}px; 
-            background: white; 
+            position: relative;
+            width: ${exportArea.width}px;
+            height: ${exportArea.height}px;
+            background: white;
             overflow: hidden;
             margin: 0 auto;
             box-shadow: 0 0 50px rgba(0,0,0,0.1);
         `;
-        
+
         // Adjust for crop offset
         const content = document.createElement('div');
         content.style = `position: absolute; left: ${-exportArea.left}px; top: ${-exportArea.top}px; width: 100%; height: 100%;`;
-        
+
         // Append elements
         Array.from(finalWorld.children).forEach(child => {
             content.appendChild(child);
@@ -1730,7 +1730,7 @@ class UniversalScraper {
                         if (b64) node.src = b64;
                     } catch (e) {}
                 }
-                
+
                 // Handle backgrounds
                 const bg = node.style?.backgroundImage;
                 if (bg && (bg.includes('blob:') || bg.includes('http'))) {
@@ -1747,7 +1747,7 @@ class UniversalScraper {
                 await Promise.all(Array.from(node.children).map(child => processNode(child)));
             }
         };
-        
+
         await processNode(wrapper);
 
         const html = `<!DOCTYPE html>
@@ -1770,18 +1770,18 @@ class UniversalScraper {
         this.downloadFile(html, `universal-export-${Date.now()}.html`);
         this.updateStatus('Export complete!', false);
     }
-    
+
     // --- CROPPING METHODS ---
     _startCropping(e) {
         if (e.target !== this.canvasWorld && e.target !== this.filterContainer) return;
-        
+
         this.cropState.active = true;
         const worldX = (e.clientX - this.canvasState.x) / this.canvasState.scale;
         const worldY = (e.clientY - this.canvasState.y) / this.canvasState.scale;
-        
+
         this.cropState.startX = worldX;
         this.cropState.startY = worldY;
-        
+
         if (!this.cropOverlay) {
             this.cropOverlay = document.createElement('div');
             this.cropOverlay.className = 'mb-crop-overlay';
@@ -1820,14 +1820,14 @@ class UniversalScraper {
         const vw = window.innerWidth;
         const vh = window.innerHeight;
         const scale = Math.min((vw * 0.95) / rect.width, (vh * 0.95) / rect.height, 2);
-        
+
         this.filterContainer.classList.add('fall-away');
         this.canvasWorld.style.transition = 'transform 0.6s cubic-bezier(0.19, 1, 0.22, 1)';
         this.canvasState.scale = scale;
         this.canvasState.x = (vw / 2) - (rect.left + rect.width / 2) * scale;
         this.canvasState.y = (vh / 2) - (rect.top + rect.height / 2) * scale;
         this.updateCanvasTransform();
-        
+
         setTimeout(() => {
             this.canvasWorld.style.transition = '';
         }, 600);
@@ -1840,11 +1840,11 @@ class UniversalScraper {
         }
 
         this.updateStatus("Preparing direct element export...", true);
-        
+
         const fragments = this.multiCaptureQueue.map(el => this.freezeStyles(el));
         const wrapper = document.createElement('div');
         wrapper.style = "display: flex; flex-direction: column; gap: 40px; padding: 60px; background: white; max-width: 1200px; margin: 0 auto; box-shadow: 0 10px 40px rgba(0,0,0,0.1); border-radius: 12px;";
-        
+
         fragments.forEach(f => {
             // Sanitize any iframes in this fragment
             f.querySelectorAll('iframe').forEach(iframe => {
@@ -1871,16 +1871,16 @@ class UniversalScraper {
 
         this.downloadFile(html, `element-export-${Date.now()}.html`);
         this.updateStatus("Export complete!", false);
-        
+
         // Reset and return
         this.multiCaptureQueue = [];
         this.disablePicker(true);
     }
-    
+
     // --- IFRAME SANITIZATION (SECURITY) ---
     sanitizeIframe(node) {
         if (!node || node.tagName !== 'IFRAME') return;
-        
+
         if (node.hasAttribute('sandbox')) {
             let sandbox = node.getAttribute('sandbox');
             // If both allow-scripts and allow-same-origin are present, remove allow-scripts
@@ -1900,7 +1900,7 @@ class UniversalScraper {
             console.log('Sanitized iframe: added allow-same-origin sandbox attribute.');
         }
     }
-    
+
     async urlToBase64(url) {
         if (url.startsWith('data:')) return url;
         try {
@@ -1937,5 +1937,11 @@ class UniversalScraper {
     }
 }
 
-// Initialize
-const scraper = new UniversalScraper();
+
+// Initialize or Export for Testing
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = UniversalScraper;
+} else {
+    // Initialize
+    const scraper = new UniversalScraper();
+}
