@@ -8,31 +8,31 @@ console.log('Universal Element Cloner: Content Script Loaded (v2.1 Fix Applied)'
 const CONSTANTS = {
     COLORS: {
         PRIMARY: {
-            HEX: '#0051C3',
-            RGB: '0, 81, 195',
-            HOVER: '#003d99'
+            HEX: '${CONSTANTS.COLORS.PRIMARY.HEX}',
+            RGB: '${CONSTANTS.COLORS.PRIMARY.RGB}',
+            HOVER: '${CONSTANTS.COLORS.PRIMARY.HOVER}'
         },
         SUCCESS: {
-            HEX: '#22c55e',
-            RGB: '34, 197, 94',
-            HOVER: '#059669'
+            HEX: '${CONSTANTS.COLORS.SUCCESS.HEX}',
+            RGB: '${CONSTANTS.COLORS.SUCCESS.RGB}',
+            HOVER: '${CONSTANTS.COLORS.SUCCESS.HOVER}'
         },
         DANGER: {
-            HEX: '#ef4444',
-            RGB: '239, 68, 68',
-            HOVER: '#dc2626'
+            HEX: '${CONSTANTS.COLORS.DANGER.HEX}',
+            RGB: '${CONSTANTS.COLORS.DANGER.RGB}',
+            HOVER: '${CONSTANTS.COLORS.DANGER.HOVER}'
         },
         WARNING: {
-            HEX: '#f59e0b',
-            RGB: '245, 158, 11'
+            HEX: '${CONSTANTS.COLORS.WARNING.HEX}',
+            RGB: '${CONSTANTS.COLORS.WARNING.RGB}'
         },
         EXPORT: {
-            HEX: '#10b981',
-            RGB: '16, 185, 129'
+            HEX: '${CONSTANTS.COLORS.EXPORT.HEX}',
+            RGB: '${CONSTANTS.COLORS.EXPORT.RGB}'
         },
         DEBUG: {
-            HEX: '#ff00ff',
-            RGB: '255, 0, 255'
+            HEX: '${CONSTANTS.COLORS.DEBUG.HEX}',
+            RGB: '${CONSTANTS.COLORS.DEBUG.RGB}'
         }
     }
 };
@@ -1818,7 +1818,7 @@ class UniversalScraper {
         if (!this.cropOverlay) {
             this.cropOverlay = document.createElement('div');
             this.cropOverlay.className = 'mb-crop-overlay';
-            this.cropOverlay.style = `position: absolute; border: 2px dashed ${CONSTANTS.COLORS.DEBUG.HEX}; background: rgba(${CONSTANTS.COLORS.DEBUG.RGB}, 0.1); pointer-events: none; z-index: 10000;`;
+            this.cropOverlay.style = 'position: absolute; border: 2px dashed ${CONSTANTS.COLORS.DEBUG.HEX}; background: rgba(${CONSTANTS.COLORS.DEBUG.RGB}, 0.1); pointer-events: none; z-index: 10000;';
             this.canvasWorld.appendChild(this.cropOverlay);
         }
     }
@@ -1970,5 +1970,11 @@ class UniversalScraper {
     }
 }
 
-// Initialize
-const scraper = new UniversalScraper();
+
+// Initialize or Export for Testing
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = UniversalScraper;
+} else {
+    // Initialize
+    const scraper = new UniversalScraper();
+}
