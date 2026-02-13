@@ -53,25 +53,7 @@ class ElementPicker {
     }
 
     _injectStyles() {
-         if (!document.getElementById('mb-selection-styles')) {
-            const style = document.createElement('style');
-            style.id = 'mb-selection-styles';
-            style.innerHTML = `
-                .mb-highlight {
-                    outline: 2px solid #0051C3 !important;
-                    outline-offset: -2px !important;
-                    background: rgba(0, 81, 195, 0.1) !important;
-                    cursor: pointer !important;
-                }
-                .mb-selected {
-                    outline: 3px solid #22c55e !important;
-                    outline-offset: -3px !important;
-                    box-shadow: 0 0 15px rgba(34, 197, 94, 0.6) !important;
-                    background: rgba(34, 197, 94, 0.05) !important;
-                }
-            `;
-            document.head.appendChild(style);
-        }
+         
     }
 
     _handleHover(e) {

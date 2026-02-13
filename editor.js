@@ -121,47 +121,7 @@ class EditorUI {
         this.minimap.appendChild(this.minimapView);
         this.filterContainer.appendChild(this.minimap);
 
-        if (!document.getElementById('mb-filter-styles')) {
-            const style = document.createElement('style');
-            style.id = 'mb-filter-styles';
-            style.innerHTML = `
-                #mb-canvas-viewport { font-family: -apple-system, system-ui, sans-serif; }
-                #mb-canvas-toolbar {
-                    position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-                    background: #1e1e1e; padding: 8px 16px; border-radius: 8px;
-                    display: flex; gap: 12px; align-items: center;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.4); border: 1px solid #333;
-                    z-index: 2000001;
-                }
-                .mb-tool-group { display: flex; gap: 4px; align-items: center; }
-                .mb-toolbox-divider { width: 1px; height: 24px; background: #444; margin: 0 8px; }
-                .mb-tool-btn {
-                    background: transparent; border: none; color: #aaa;
-                    padding: 8px 12px; border-radius: 6px; cursor: pointer;
-                    font-size: 14px; font-weight: 500; transition: all 0.2s;
-                    display: flex; align-items: center; gap: 6px;
-                }
-                .mb-tool-btn:hover { background: #333; color: white; }
-                .mb-tool-btn.active { background: #0051C3; color: white; }
-                .mb-tool-btn.primary { background: #333; color: #22c55e; border: 1px solid #22c55e; }
-                .mb-tool-btn.primary:hover { background: #22c55e; color: black; }
-                .mb-tool-btn.danger { color: #ff4444; }
-                .mb-tool-btn.danger:hover { background: #ff4444; color: white; }
-                .mb-tool-btn.success { background: #22c55e; color: black; font-weight: bold; }
-                .mb-tool-btn.success:hover { background: #16a34a; }
-
-                #mb-zoom-level { color: #888; font-size: 12px; min-width: 40px; text-align: center; }
-
-                .mb-hover-move { outline: 2px solid #0051C3 !important; cursor: move !important; }
-                .mb-hover-delete { outline: 2px solid #ff4444 !important; background: rgba(255, 68, 68, 0.1) !important; cursor: not-allowed !important; }
-                .mb-hover-resize { outline: 2px dashed #ff00ff !important; cursor: nwse-resize !important; }
-                .mb-selected-export { outline: 3px solid #22c55e !important; box-shadow: 0 0 15px rgba(34, 197, 94, 0.5) !important; }
-                .mb-delete-selected { outline: 3px solid #ff4444 !important; background: rgba(255, 68, 68, 0.2) !important; }
-
-                .mb-crop-overlay { pointer-events: none; z-index: 10000; }
-            `;
-            document.head.appendChild(style);
-        }
+        
 
         document.body.appendChild(this.filterContainer);
 
