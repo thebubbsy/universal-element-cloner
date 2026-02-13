@@ -85,3 +85,30 @@
     border-radius: 4px;
     background: rgba(239, 68, 68, 0.1) !important;
 }
+
+/* Canvas Viewport */
+#mb-canvas-viewport {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #121212;
+    z-index: 2000000;
+    overflow: hidden;
+    font-family: inherit;
+    cursor: grab;
+    user-select: none;
+    background-image: radial-gradient(#333 1px, transparent 1px);
+    background-size: 30px 30px;
+}
+
+/* Canvas World - additional styles moved from JS */
+#mb-canvas-world {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10000px;
+    height: 10000px;
+    transform-origin: 0 0;
+}

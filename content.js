@@ -5,39 +5,6 @@
 
 console.log('Universal Element Cloner: Content Script Loaded (v2.1 Fix Applied)');
 
-const CONSTANTS = {
-    COLORS: {
-        PRIMARY: {
-            HEX: '${CONSTANTS.COLORS.PRIMARY.HEX}',
-            RGB: '${CONSTANTS.COLORS.PRIMARY.RGB}',
-            HOVER: '${CONSTANTS.COLORS.PRIMARY.HOVER}'
-        },
-        SUCCESS: {
-            HEX: '${CONSTANTS.COLORS.SUCCESS.HEX}',
-            RGB: '${CONSTANTS.COLORS.SUCCESS.RGB}',
-            HOVER: '${CONSTANTS.COLORS.SUCCESS.HOVER}'
-        },
-        DANGER: {
-            HEX: '${CONSTANTS.COLORS.DANGER.HEX}',
-            RGB: '${CONSTANTS.COLORS.DANGER.RGB}',
-            HOVER: '${CONSTANTS.COLORS.DANGER.HOVER}'
-        },
-        WARNING: {
-            HEX: '${CONSTANTS.COLORS.WARNING.HEX}',
-            RGB: '${CONSTANTS.COLORS.WARNING.RGB}'
-        },
-        EXPORT: {
-            HEX: '${CONSTANTS.COLORS.EXPORT.HEX}',
-            RGB: '${CONSTANTS.COLORS.EXPORT.RGB}'
-        },
-        DEBUG: {
-            HEX: '${CONSTANTS.COLORS.DEBUG.HEX}',
-            RGB: '${CONSTANTS.COLORS.DEBUG.RGB}'
-        }
-    }
-};
-
-
 class UniversalScraper {
     constructor() {
         this.pickerActive = false;
@@ -270,21 +237,21 @@ class UniversalScraper {
             style.id = 'mb-selection-styles';
             style.innerHTML = `
                 .mb-highlight {
-                    outline: 2px solid ${CONSTANTS.COLORS.PRIMARY.HEX} !important;
+                    outline: 2px solid #0051C3 !important;
                     outline-offset: -2px !important;
-                    background: rgba(${CONSTANTS.COLORS.PRIMARY.RGB}, 0.1) !important;
+                    background: rgba(0, 81, 195, 0.1) !important;
                     cursor: pointer !important;
                 }
                 .mb-highlight-active {
-                    background: rgba(${CONSTANTS.COLORS.SUCCESS.RGB}, 0.4) !important;
-                    box-shadow: 0 0 15px rgba(${CONSTANTS.COLORS.SUCCESS.RGB}, 0.6) !important;
-                    outline: 2px solid ${CONSTANTS.COLORS.SUCCESS.HEX} !important;
+                    background: rgba(34, 197, 94, 0.4) !important;
+                    box-shadow: 0 0 15px rgba(34, 197, 94, 0.6) !important;
+                    outline: 2px solid #22c55e !important;
                 }
                 .mb-selected {
-                    outline: 3px solid ${CONSTANTS.COLORS.SUCCESS.HEX} !important;
+                    outline: 3px solid #22c55e !important;
                     outline-offset: -3px !important;
-                    box-shadow: 0 0 15px rgba(${CONSTANTS.COLORS.SUCCESS.RGB}, 0.6) !important;
-                    background: rgba(${CONSTANTS.COLORS.SUCCESS.RGB}, 0.05) !important;
+                    box-shadow: 0 0 15px rgba(34, 197, 94, 0.6) !important;
+                    background: rgba(34, 197, 94, 0.05) !important;
                 }
             `;
             document.head.appendChild(style);
@@ -964,23 +931,10 @@ class UniversalScraper {
         // Viewport: Fixed window into the world
         this.filterContainer = document.createElement('div');
         this.filterContainer.id = 'mb-canvas-viewport';
-        this.filterContainer.style = `
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #121212; z-index: 2000000; overflow: hidden;
-            font-family: inherit; cursor: grab; user-select: none;
-            background-image: radial-gradient(#333 1px, transparent 1px);
-            background-size: 30px 30px;
-        `;
 
         // World: The surface
         this.canvasWorld = document.createElement('div');
         this.canvasWorld.id = 'mb-canvas-world';
-        this.canvasWorld.style = `
-            position: absolute; top: 0; left: 0;
-            width: 10000px; height: 10000px;
-            transform-origin: 0 0;
-            will-change: transform;
-        `;
 
         // Canvas Paper area (Visual helper)
         this.canvasPaper = document.createElement('div');
@@ -1052,7 +1006,7 @@ class UniversalScraper {
         // Minimap content (simplified view)
         this.minimapView = document.createElement('div');
         this.minimapView.style = `
-            position: absolute; border: 1px solid ${CONSTANTS.COLORS.PRIMARY.HEX}; background: rgba(${CONSTANTS.COLORS.PRIMARY.RGB}, 0.2);
+            position: absolute; border: 1px solid #0051C3; background: rgba(0, 81, 195, 0.2);
             cursor: grab;
         `;
         this.minimap.appendChild(this.minimapView);
@@ -1064,11 +1018,11 @@ class UniversalScraper {
         const style = document.createElement('style');
         style.id = 'mb-filter-styles';
         style.innerHTML = `
-            .mb-hover-delete { outline: 2px solid ${CONSTANTS.COLORS.DANGER.HEX} !important; cursor: crosshair !important; background: rgba(${CONSTANTS.COLORS.DANGER.RGB}, 0.05) !important; }
-            .mb-hover-move { outline: 2px solid ${CONSTANTS.COLORS.WARNING.HEX} !important; cursor: move !important; background: rgba(${CONSTANTS.COLORS.WARNING.RGB}, 0.05) !important; }
-            .mb-hover-resize { outline: 2px solid ${CONSTANTS.COLORS.PRIMARY.HEX} !important; cursor: nwse-resize !important; background: rgba(${CONSTANTS.COLORS.PRIMARY.RGB}, 0.05) !important; }
-            .mb-hover-export { outline: 2px solid ${CONSTANTS.COLORS.EXPORT.HEX} !important; cursor: pointer !important; background: rgba(${CONSTANTS.COLORS.EXPORT.RGB}, 0.1) !important; }
-            .mb-selected-export { outline: 3px solid ${CONSTANTS.COLORS.EXPORT.HEX} !important; outline-offset: 2px !important; box-shadow: 0 0 20px rgba(${CONSTANTS.COLORS.EXPORT.RGB}, 0.3) !important; }
+            .mb-hover-delete { outline: 2px solid #ef4444 !important; cursor: crosshair !important; background: rgba(239, 68, 68, 0.05) !important; }
+            .mb-hover-move { outline: 2px solid #f59e0b !important; cursor: move !important; background: rgba(245, 158, 11, 0.05) !important; }
+            .mb-hover-resize { outline: 2px solid #0051C3 !important; cursor: nwse-resize !important; background: rgba(0, 81, 195, 0.05) !important; }
+            .mb-hover-export { outline: 2px solid #10b981 !important; cursor: pointer !important; background: rgba(16, 185, 129, 0.1) !important; }
+            .mb-selected-export { outline: 3px solid #10b981 !important; outline-offset: 2px !important; box-shadow: 0 0 20px rgba(16, 185, 129, 0.3) !important; }
             .mb-resizable { resize: both !important; overflow: auto !important; min-width: 20px; min-height: 20px; pointer-events: auto !important; }
             .mb-dragging { opacity: 0.5 !important; pointer-events: none !important; }
             #mb-canvas-viewport:active { cursor: grabbing; }
@@ -1094,27 +1048,27 @@ class UniversalScraper {
                 font-size: 16px; transition: all 0.2s;
             }
             .mb-tool-btn:hover { background: #333; color: #fff; }
-            .mb-tool-btn.active { background: ${CONSTANTS.COLORS.PRIMARY.HEX}; color: #fff; border-color: ${CONSTANTS.COLORS.PRIMARY.HOVER}; }
-            .mb-tool-btn.primary { width: auto; padding: 0 12px; background: ${CONSTANTS.COLORS.PRIMARY.HEX}; color: white; font-size: 13px; font-weight: 500; }
-            .mb-tool-btn.primary:hover { background: ${CONSTANTS.COLORS.PRIMARY.HOVER}; }
-            .mb-tool-btn.success { width: auto; padding: 0 12px; background: ${CONSTANTS.COLORS.EXPORT.HEX}; color: white; font-size: 13px; font-weight: 500; }
-            .mb-tool-btn.success:hover { background: ${CONSTANTS.COLORS.SUCCESS.HOVER}; }
-            .mb-tool-btn.danger { width: auto; padding: 0 12px; background: ${CONSTANTS.COLORS.DANGER.HEX}; color: white; font-size: 13px; font-weight: 500; }
-            .mb-tool-btn.danger:hover { background: ${CONSTANTS.COLORS.DANGER.HOVER}; }
+            .mb-tool-btn.active { background: #0051C3; color: #fff; border-color: #003d99; }
+            .mb-tool-btn.primary { width: auto; padding: 0 12px; background: #0051C3; color: white; font-size: 13px; font-weight: 500; }
+            .mb-tool-btn.primary:hover { background: #003d99; }
+            .mb-tool-btn.success { width: auto; padding: 0 12px; background: #10b981; color: white; font-size: 13px; font-weight: 500; }
+            .mb-tool-btn.success:hover { background: #059669; }
+            .mb-tool-btn.danger { width: auto; padding: 0 12px; background: #ef4444; color: white; font-size: 13px; font-weight: 500; }
+            .mb-tool-btn.danger:hover { background: #dc2626; }
             #mb-zoom-level { min-width: 45px; text-align: center; font-size: 12px; color: #888; }
 
             /* Crop Tool Styles */
             .mb-crop-overlay {
                 position: absolute;
-                border: 2px dashed ${CONSTANTS.COLORS.PRIMARY.HEX};
-                background: rgba(${CONSTANTS.COLORS.PRIMARY.RGB}, 0.1);
+                border: 2px dashed #0051C3;
+                background: rgba(0, 81, 195, 0.1);
                 pointer-events: none;
                 z-index: 2000002;
             }
             #mb-canvas-viewport.fall-away { background-image: none !important; }
             .mb-canvas-viewport.cropping { cursor: crosshair !important; }
 
-            .mb-export-selected { outline: 3px solid ${CONSTANTS.COLORS.EXPORT.HEX} !important; outline-offset: 4px; border-radius: 4px; }
+            .mb-export-selected { outline: 3px solid #10b981 !important; outline-offset: 4px; border-radius: 4px; }
         `;
         document.head.appendChild(style);
         this.initEventListeners();
@@ -1625,7 +1579,7 @@ class UniversalScraper {
         doneBtn.innerText = 'Finish Selection';
         doneBtn.style = `
             position: fixed; top: 20px; right: 50%; transform: translateX(-50%);
-            background: ${CONSTANTS.COLORS.EXPORT.HEX}; color: white; padding: 10px 20px;
+            background: #10b981; color: white; padding: 10px 20px;
             border: none; border-radius: 6px; font-size: 16px; font-weight: bold;
             cursor: pointer; z-index: 2000002; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             font-family: system-ui, sans-serif;
@@ -1818,7 +1772,7 @@ class UniversalScraper {
         if (!this.cropOverlay) {
             this.cropOverlay = document.createElement('div');
             this.cropOverlay.className = 'mb-crop-overlay';
-            this.cropOverlay.style = 'position: absolute; border: 2px dashed ${CONSTANTS.COLORS.DEBUG.HEX}; background: rgba(${CONSTANTS.COLORS.DEBUG.RGB}, 0.1); pointer-events: none; z-index: 10000;';
+            this.cropOverlay.style = 'position: absolute; border: 2px dashed #ff00ff; background: rgba(255, 0, 255, 0.1); pointer-events: none; z-index: 10000;';
             this.canvasWorld.appendChild(this.cropOverlay);
         }
     }
@@ -1969,7 +1923,6 @@ class UniversalScraper {
         this.redoStack = [];
     }
 }
-
 
 // Initialize or Export for Testing
 if (typeof module !== 'undefined' && module.exports) {
