@@ -285,12 +285,22 @@ const initMessageListeners = () => {
         } else if (msg.action === 'GUIDED_PROGRESS') {
             if (ui.progressBar) ui.progressBar.style.width = `${msg.progress}%`;
             if (ui.scrollerList && msg.scrollers) {
-                ui.scrollerList.innerHTML = msg.scrollers.map(s => `
-                    <div class="scroller-item">
-                        <span>${s.name}</span>
-                        <span class="scroller-status">${s.progress}%</span>
-                    </div>
-                `).join('');
+                ui.scrollerList.innerHTML = "";
+                msg.scrollers.forEach(s => {
+                    const item = document.createElement("div");
+                    item.className = "scroller-item";
+
+                    const nameSpan = document.createElement("span");
+                    nameSpan.textContent = s.name;
+
+                    const statusSpan = document.createElement("span");
+                    statusSpan.className = "scroller-status";
+                    statusSpan.textContent = `${s.progress}%`;
+
+                    item.appendChild(nameSpan);
+                    item.appendChild(statusSpan);
+                    ui.scrollerList.appendChild(item);
+                });
             }
             ui.statusText.innerText = `Preparing: ${msg.progress}%`;
         } else if (msg.action === 'OPEN_SIDE_EDITOR_REPLY') {
