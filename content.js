@@ -1924,5 +1924,10 @@ class UniversalScraper {
     }
 }
 
-// Initialize
-const scraper = new UniversalScraper();
+// Initialize or Export for Testing
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = UniversalScraper;
+} else {
+    // Initialize
+    const scraper = new UniversalScraper();
+}
