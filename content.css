@@ -19,7 +19,7 @@
 .mb-captured {
     /* Removed green background per user request - keeping only subtle shadow */
     box-shadow: inset 0 0 10px rgba(34, 197, 94, 0.05) !important;
-    transition: box-shadow 0.5s ease-out !important;
+    transition: box-shadow 0.5s ease-out !important; transition-delay: var(--mb-reveal-delay, 0ms) !important;
 }
 
 /* Scanning Overlay Element */
