@@ -46,7 +46,6 @@ class DomScraper {
 
         ScraperUtils.updateStatus("Scraping started...", true);
         this.startScanning();
-        this.startAnimationLoop();
         this.captureLoop(speed);
     }
 
@@ -78,31 +77,6 @@ class DomScraper {
         }
     }
 
-    startAnimationLoop() {
-        if (!this.scraping) return;
-
-        if (this.scanOverlay) {
-            const rect = this.targetElement.getBoundingClientRect();
-            if (this.scrapingSpeed === 0) {
-                // Sweep animation for static capture (1.5s sweep for more energy)
-                const elapsed = (Date.now() - this._scrapeStartTime) % 1500;
-                const percent = elapsed / 1500;
-                const sweepY = rect.top + (rect.height * percent);
-                this.scanOverlay.style.top = `${sweepY}px`;
-                this.scanOverlay.style.height = '4px';
-            } else {
-                // Follow the scroll lag zone (25% behind the leading edge)
-                const lagZoneThreshold = window.innerHeight * 0.25;
-                // If scrolling UP, leading edge is TOP (0), lag zone is at 25% from TOP
-                // If scrolling DOWN, leading edge is BOTTOM (100%), lag zone is at 25% from BOTTOM
-                const lineY = this.direction === 'up' ? lagZoneThreshold : (window.innerHeight - lagZoneThreshold);
-                this.scanOverlay.style.top = `${lineY}px`;
-                this.scanOverlay.style.height = '8px'; // Thicker scanning zone when moving
-            }
-        }
-
-        requestAnimationFrame(() => this.startAnimationLoop());
-    }
 
     findScrollableAncestor(el) {
         if (!el) return null;
