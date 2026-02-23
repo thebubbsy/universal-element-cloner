@@ -1,7 +1,7 @@
 class ScraperUtils {
     static generateHash(el) {
         // Precise fingerprint: Text content + ID + ClassName + Attributes + Child Tags
-        const text = el.innerText?.substring(0, 200) || "";
+        const text = el.textContent?.substring(0, 200) || "";
         const id = el.id || "";
         // Ignore mb-captured class to avoid duplicate capture when color changes
         const cls = Array.from(el.classList)
@@ -209,7 +209,7 @@ class ScraperUtils {
                 const pComp = window.getComputedStyle(source, type);
                 if (pComp.content && pComp.content !== 'none' && pComp.content !== '""') {
                     const span = document.createElement('span');
-                    span.innerText = pComp.content.replace(/^"|"$/g, '');
+                    span.textContent = pComp.content.replace(/^"|"$/g, '');
 
                     // Copy prominent pseudo-styles
                     ['position', 'display', 'color', 'background', 'width', 'height', 'top', 'left', 'right', 'bottom', 'margin', 'padding', 'border', 'borderRadius', 'fontSize', 'fontWeight'].forEach(k => {
