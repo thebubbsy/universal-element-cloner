@@ -1,3 +1,12 @@
+const ensureAbsolute = (url) => {
+    if (!url || url.startsWith('data:') || url.startsWith('blob:')) return url;
+    try {
+        return new URL(url, window.location.href).href;
+    } catch (e) {
+        return url;
+    }
+};
+
 class ScraperUtils {
     static generateHash(el) {
         // Precise fingerprint: Text content + ID + ClassName + Attributes + Child Tags
@@ -99,14 +108,6 @@ class ScraperUtils {
         highlightedElements.forEach(node => node.classList.add('mb-highlight'));
 
         const processImage = (target, source) => {
-            const ensureAbsolute = (url) => {
-                if (!url || url.startsWith('data:') || url.startsWith('blob:')) return url;
-                try {
-                    return new URL(url, window.location.href).href;
-                } catch (e) {
-                    return url;
-                }
-            };
 
             // IMMEDIATE CAPTURE & EMBED
             const embedImage = async (url, setter) => {
