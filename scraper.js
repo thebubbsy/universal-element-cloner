@@ -255,7 +255,8 @@ class DomScraper {
                 item.captured = true;
                 // Faster recursive reveal
                 item.el.querySelectorAll('*').forEach((c, i) => {
-                    setTimeout(() => c.classList.add('mb-captured'), i * 20);
+                    c.style.setProperty('--mb-reveal-delay', `${i * 20}ms`);
+                    c.classList.add('mb-captured');
                 });
             }
         });
