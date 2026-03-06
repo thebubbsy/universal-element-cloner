@@ -98,12 +98,6 @@ class ScraperUtils {
         const hadCaptured = el.classList.contains('mb-captured');
         const hadHighlight = el.classList.contains('mb-highlight');
 
-        // Temporary removal of highlight classes from SOURCE for clean computed style capture
-        const cleanup = (node) => {
-            if (node.nodeType !== 1) return;
-            node.classList.remove('mb-captured', 'mb-highlight', 'mb-selected');
-            for (let child of node.children) cleanup(child);
-        };
 
         // We need to restore them after cloning, so we'll just remove them from the clone afterwards if we want
         // But better is to remove from source, clone, then restore source.
