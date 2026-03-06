@@ -1,0 +1,18 @@
+﻿name: Build Windows Artifact
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Zip Files for Windows
+        run: Compress-Archive -Path "*" -DestinationPath "universal-element-cloner-Windows.zip"
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: universal-element-cloner-Windows
+          path: universal-element-cloner-Windows.zip
