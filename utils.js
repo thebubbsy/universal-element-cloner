@@ -8,6 +8,20 @@ const ensureAbsolute = (url) => {
 };
 
 class ScraperUtils {
+    static COMPUTED_PROPS = [
+        'display', 'position', 'top', 'left', 'right', 'bottom',
+        'width', 'height', 'minWidth', 'maxWidth', 'minHeight', 'maxHeight',
+        'margin', 'padding', 'border', 'borderWidth', 'borderColor', 'borderStyle', 'borderRadius',
+        'backgroundColor', 'backgroundImage', 'backgroundSize', 'backgroundPosition', 'backgroundRepeat',
+        'color', 'fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing',
+        'textAlign', 'textTransform', 'textDecoration',
+        'overflow', 'visibility', 'opacity', 'boxShadow', 'zIndex',
+        'display', 'flex', 'flexDirection', 'alignItems', 'justifyContent', 'flexWrap', 'flexGrow', 'flexShrink', 'flexBasis',
+        'gridTemplateColumns', 'gridTemplateRows', 'gridGap', 'gap',
+        'transform', 'transition', 'cursor', 'pointerEvents',
+        'boxSizing', 'backdropFilter', 'filter', 'mixBlendMode', 'objectFit'
+    ];
+
     static generateHash(el) {
         // Precise fingerprint: Text content + ID + ClassName + Attributes + Child Tags
         const text = el.textContent?.substring(0, 200) || "";
@@ -165,19 +179,7 @@ class ScraperUtils {
             const comp = window.getComputedStyle(source);
 
             // Comprehensive properties for pixel-perfect fidelity
-            const props = [
-                'display', 'position', 'top', 'left', 'right', 'bottom',
-                'width', 'height', 'minWidth', 'maxWidth', 'minHeight', 'maxHeight',
-                'margin', 'padding', 'border', 'borderWidth', 'borderColor', 'borderStyle', 'borderRadius',
-                'backgroundColor', 'backgroundImage', 'backgroundSize', 'backgroundPosition', 'backgroundRepeat',
-                'color', 'fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing',
-                'textAlign', 'textTransform', 'textDecoration',
-                'overflow', 'visibility', 'opacity', 'boxShadow', 'zIndex',
-                'display', 'flex', 'flexDirection', 'alignItems', 'justifyContent', 'flexWrap', 'flexGrow', 'flexShrink', 'flexBasis',
-                'gridTemplateColumns', 'gridTemplateRows', 'gridGap', 'gap',
-                'transform', 'transition', 'cursor', 'pointerEvents',
-                'boxSizing', 'backdropFilter', 'filter', 'mixBlendMode', 'objectFit'
-            ];
+            const props = ScraperUtils.COMPUTED_PROPS;
 
             props.forEach(p => {
                 let val = comp[p];
