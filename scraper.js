@@ -130,11 +130,6 @@ class DomScraper {
         // High Fidelity Clone
         const clone = ScraperUtils.freezeElement(el, this.assetCache);
 
-        // Final Clean
-        clone.classList.remove('mb-captured', 'mb-highlight');
-        Array.from(clone.querySelectorAll('.mb-captured, .mb-highlight')).forEach(c => {
-            c.classList.remove('mb-captured', 'mb-highlight');
-        });
 
         const itemObj = { html: clone.outerHTML, hash: hash };
 
