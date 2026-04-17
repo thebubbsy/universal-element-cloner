@@ -3,8 +3,6 @@
  * Implementation by Matthew Bubb's trusty screwdriver.
  */
 
-console.log('Universal Element Cloner: Popup Script Loaded');
-
 // UI Elements cache
 const ui = {
     // Top-level elements
