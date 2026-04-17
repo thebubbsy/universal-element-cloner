@@ -76,6 +76,33 @@ class UniversalScraper {
         });
     }
 
+
+    sanitizeTree(root) {
+        const dangerousTags = ['SCRIPT', 'OBJECT', 'EMBED', 'IFRAME', 'FRAME', 'APPLET', 'META', 'LINK'];
+        const elements = root.querySelectorAll('*');
+
+        elements.forEach(el => {
+            if (dangerousTags.includes(el.tagName)) {
+                el.remove();
+                return;
+            }
+
+            // Remove on* attributes
+            Array.from(el.attributes).forEach(attr => {
+                if (attr.name.toLowerCase().startsWith('on') || attr.value.toLowerCase().trim().startsWith('javascript:')) {
+                    el.removeAttribute(attr.name);
+                }
+            });
+
+            // Remove javascript URLs from links
+            if (el.tagName === 'A' && el.href && el.href.toLowerCase().trim().startsWith('javascript:')) {
+                el.removeAttribute('href');
+            }
+        });
+
+        return root;
+    }
+
     openSideEditor() {
         const fragments = [];
 
@@ -86,12 +113,14 @@ class UniversalScraper {
             });
         }
 
+
         // Process scraper captured items
         if (this.scraper.capturedItems.length > 0) {
+            const parser = new DOMParser();
             this.scraper.capturedItems.forEach(item => {
-                const temp = document.createElement('div');
-                temp.innerHTML = item.html;
-                fragments.push(temp.firstElementChild);
+                const doc = parser.parseFromString(item.html, 'text/html');
+                const cleanNode = this.sanitizeTree(doc.body.firstElementChild || doc.body);
+                fragments.push(cleanNode);
             });
         }
 
@@ -184,5 +213,10 @@ class UniversalScraper {
     }
 }
 
-// Initialize
-const scraper = new UniversalScraper();
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = UniversalScraper;
+} else {
+    // Initialize
+    const scraper = new UniversalScraper();
+}
