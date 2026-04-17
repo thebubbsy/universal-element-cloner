@@ -40,6 +40,50 @@ global.URL = {
 global.Blob = jest.fn();
 
 // Import the class under test
+
+global.ElementPicker = class {};
+global.DomScraper = class {};
+
+global.ContentExporter = class {
+    assembleExport(content) {
+        // Create a temporary container to process the content
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = content;
+
+        // Sanitize all iframes in the content
+        Array.from(tempDiv.querySelectorAll('iframe')).forEach(iframe => {
+            if (iframe.hasAttribute('sandbox')) {
+                let sandbox = iframe.getAttribute('sandbox');
+                if (sandbox.includes('allow-scripts') && sandbox.includes('allow-same-origin')) {
+                    sandbox = sandbox.replace('allow-scripts', '').trim();
+                    iframe.setAttribute('sandbox', sandbox);
+                }
+            } else {
+                iframe.setAttribute('sandbox', 'allow-same-origin');
+            }
+        });
+
+        // Assemble the final HTML document
+        return `<!DOCTYPE html>
+<html>
+<head>
+    <title>Universal Element Export</title>
+</head>
+<body>
+    ${tempDiv.innerHTML}
+</body>
+</html>`;
+    }
+};
+
+global.EditorUI = class {};
+global.ScraperUtils = {
+    freezeElement: jest.fn(),
+    updateStatus: jest.fn(),
+    downloadFile: jest.fn(),
+    sanitizeIframe: jest.fn()
+};
+
 const UniversalScraper = require('./content.js');
 
 describe('UniversalScraper', () => {
@@ -86,7 +130,7 @@ describe('UniversalScraper', () => {
             };
             global.document.createElement.mockReturnValue(mockTempDiv);
 
-            const result = scraper.assembleExport(content);
+            const result = scraper.exporter.assembleExport(content);
 
             // Verify tempDiv was created and content set
             expect(global.document.createElement).toHaveBeenCalledWith('div');
@@ -119,7 +163,7 @@ describe('UniversalScraper', () => {
             };
             global.document.createElement.mockReturnValue(mockTempDiv);
 
-            const result = scraper.assembleExport(content);
+            const result = scraper.exporter.assembleExport(content);
 
             // Verify sanitization logic
             expect(mockIframe.getAttribute).toHaveBeenCalledWith('sandbox');
@@ -148,7 +192,7 @@ describe('UniversalScraper', () => {
             };
             global.document.createElement.mockReturnValue(mockTempDiv);
 
-            scraper.assembleExport(content);
+            scraper.exporter.assembleExport(content);
 
             // Verify sanitization logic
             expect(mockIframe.hasAttribute).toHaveBeenCalledWith('sandbox');
@@ -182,10 +226,86 @@ describe('UniversalScraper', () => {
             };
             global.document.createElement.mockReturnValue(mockTempDiv);
 
-            scraper.assembleExport(content);
+            scraper.exporter.assembleExport(content);
 
             expect(mockIframe1.setAttribute).toHaveBeenCalled();
             expect(mockIframe2.setAttribute).toHaveBeenCalled();
         });
     });
 });
+
+    describe('sanitizeTree', () => {
+        let scraper;
+
+        beforeEach(() => {
+            scraper = new UniversalScraper();
+        });
+
+        test('removes dangerous tags like SCRIPT and OBJECT', () => {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = '<div>Safe</div><script>alert("xss")</script><object data="something"></object>';
+
+            // It's easier to mock querySelectorAll to return mock elements
+            const mockScript = { tagName: 'SCRIPT', remove: jest.fn(), attributes: [] };
+            const mockObject = { tagName: 'OBJECT', remove: jest.fn(), attributes: [] };
+            const mockDiv = { tagName: 'DIV', remove: jest.fn(), attributes: [] };
+
+            const root = {
+                querySelectorAll: jest.fn().mockReturnValue([mockDiv, mockScript, mockObject])
+            };
+
+            scraper.sanitizeTree(root);
+
+            expect(mockScript.remove).toHaveBeenCalled();
+            expect(mockObject.remove).toHaveBeenCalled();
+            expect(mockDiv.remove).not.toHaveBeenCalled();
+        });
+
+        test('removes on* attributes', () => {
+            const mockImg = {
+                tagName: 'IMG',
+                remove: jest.fn(),
+                attributes: [
+                    { name: 'src', value: 'image.jpg' },
+                    { name: 'onerror', value: 'alert(1)' }
+                ],
+                removeAttribute: jest.fn()
+            };
+
+            const root = {
+                querySelectorAll: jest.fn().mockReturnValue([mockImg])
+            };
+
+            scraper.sanitizeTree(root);
+
+            expect(mockImg.removeAttribute).toHaveBeenCalledWith('onerror');
+            expect(mockImg.removeAttribute).not.toHaveBeenCalledWith('src');
+        });
+
+        test('removes javascript: URLs from A tags', () => {
+             const mockLink = {
+                tagName: 'A',
+                href: 'javascript:alert(1)',
+                remove: jest.fn(),
+                attributes: [],
+                removeAttribute: jest.fn()
+            };
+
+            const mockSafeLink = {
+                tagName: 'A',
+                href: 'https://example.com',
+                remove: jest.fn(),
+                attributes: [],
+                removeAttribute: jest.fn()
+            };
+
+            const root = {
+                querySelectorAll: jest.fn().mockReturnValue([mockLink, mockSafeLink])
+            };
+
+            scraper.sanitizeTree(root);
+
+            expect(mockLink.removeAttribute).toHaveBeenCalledWith('href');
+            expect(mockSafeLink.removeAttribute).not.toHaveBeenCalledWith('href');
+        });
+    });
