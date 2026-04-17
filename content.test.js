@@ -39,7 +39,114 @@ global.URL = {
 
 global.Blob = jest.fn();
 
+
+global.ElementPicker = class {
+    constructor() {
+        this.multiCaptureQueue = [];
+    }
+    enable() {}
+    disable() {}
+};
+
+global.DomScraper = class {
+    constructor() {
+        this.capturedItems = [];
+    }
+    start() {}
+    stop() {}
+};
+
+global.ContentExporter = class {
+    constructor() {
+        this.isGuidedMode = false;
+    }
+    assembleExport(html) { return html; }
+    prepareFullPageCapture() {}
+    cancelGuidedCapture() {}
+};
+
+global.EditorUI = class {
+    constructor() {
+        this.isFiltering = false;
+    }
+    open() {}
+    exitFilterMode() {}
+    prepareExport() { return ""; }
+    calculateWorldBounds() {}
+};
+
+global.DOMParser = class {
+    parseFromString(str, type) {
+        return {
+            querySelectorAll: () => [],
+            body: {
+                firstElementChild: {
+                    outerHTML: str,
+                    tagName: 'DIV'
+                }
+            }
+        };
+    }
+};
+
+global.ScraperUtils = {
+    updateStatus: jest.fn(),
+    freezeElement: jest.fn(),
+    downloadFile: jest.fn(),
+    sanitizeIframe: (node) => require('./utils.js').sanitizeIframe(node)
+};
+
 // Import the class under test
+
+global.ElementPicker = class {
+    constructor() {
+        this.multiCaptureQueue = [];
+    }
+    enable() {}
+    disable() {}
+};
+
+global.DomScraper = class {
+    constructor() {
+        this.capturedItems = [];
+    }
+    start() {}
+    stop() {}
+};
+
+global.ContentExporter = require('./exporter.js');
+
+global.EditorUI = class {
+    constructor() {
+        this.isFiltering = false;
+    }
+    open() {}
+    exitFilterMode() {}
+    prepareExport() { return ""; }
+    calculateWorldBounds() {}
+};
+
+global.DOMParser = class {
+    parseFromString(str, type) {
+        return {
+            querySelectorAll: () => [],
+            body: {
+                firstElementChild: {
+                    outerHTML: str,
+                    tagName: 'DIV'
+                }
+            }
+        };
+    }
+};
+
+global.ScraperUtils = {
+    updateStatus: jest.fn(),
+    freezeElement: jest.fn(),
+    downloadFile: jest.fn(),
+    sanitizeIframe: (node) => require('./utils.js').sanitizeIframe(node)
+};
+
 const UniversalScraper = require('./content.js');
 
 describe('UniversalScraper', () => {
@@ -86,7 +193,7 @@ describe('UniversalScraper', () => {
             };
             global.document.createElement.mockReturnValue(mockTempDiv);
 
-            const result = scraper.assembleExport(content);
+            const result = scraper.exporter.assembleExport(content);
 
             // Verify tempDiv was created and content set
             expect(global.document.createElement).toHaveBeenCalledWith('div');
@@ -119,7 +226,7 @@ describe('UniversalScraper', () => {
             };
             global.document.createElement.mockReturnValue(mockTempDiv);
 
-            const result = scraper.assembleExport(content);
+            const result = scraper.exporter.assembleExport(content);
 
             // Verify sanitization logic
             expect(mockIframe.getAttribute).toHaveBeenCalledWith('sandbox');
@@ -148,7 +255,7 @@ describe('UniversalScraper', () => {
             };
             global.document.createElement.mockReturnValue(mockTempDiv);
 
-            scraper.assembleExport(content);
+            scraper.exporter.assembleExport(content);
 
             // Verify sanitization logic
             expect(mockIframe.hasAttribute).toHaveBeenCalledWith('sandbox');
@@ -182,7 +289,7 @@ describe('UniversalScraper', () => {
             };
             global.document.createElement.mockReturnValue(mockTempDiv);
 
-            scraper.assembleExport(content);
+            scraper.exporter.assembleExport(content);
 
             expect(mockIframe1.setAttribute).toHaveBeenCalled();
             expect(mockIframe2.setAttribute).toHaveBeenCalled();

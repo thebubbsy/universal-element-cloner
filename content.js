@@ -89,9 +89,32 @@ class UniversalScraper {
         // Process scraper captured items
         if (this.scraper.capturedItems.length > 0) {
             this.scraper.capturedItems.forEach(item => {
-                const temp = document.createElement('div');
-                temp.innerHTML = item.html;
-                fragments.push(temp.firstElementChild);
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(item.html, 'text/html');
+
+                // Sanitize the parsed document
+                const scripts = doc.querySelectorAll('script, object, embed');
+                scripts.forEach(s => s.remove());
+
+                const allElements = doc.querySelectorAll('*');
+                for (let i = 0; i < allElements.length; i++) {
+                    const el = allElements[i];
+                    for (let j = el.attributes.length - 1; j >= 0; j--) {
+                        const attrName = el.attributes[j].name;
+                        if (attrName.toLowerCase().startsWith('on')) {
+                            el.removeAttribute(attrName);
+                        } else if (attrName.toLowerCase() === 'href' || attrName.toLowerCase() === 'src') {
+                            const val = el.getAttribute(attrName);
+                            if (val && val.toLowerCase().trim().startsWith('javascript:')) {
+                                el.removeAttribute(attrName);
+                            }
+                        }
+                    }
+                }
+
+                if (doc.body.firstElementChild) {
+                    fragments.push(doc.body.firstElementChild);
+                }
             });
         }
 
@@ -186,3 +209,6 @@ class UniversalScraper {
 
 // Initialize
 const scraper = new UniversalScraper();
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = UniversalScraper;
+}

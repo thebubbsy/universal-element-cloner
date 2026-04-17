@@ -119,3 +119,4 @@ class ContentExporter {
     }
 }
 window.ContentExporter = ContentExporter;
+if (typeof module !== 'undefined' && module.exports) { module.exports = ContentExporter; }

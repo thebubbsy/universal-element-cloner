@@ -237,3 +237,4 @@ class ScraperUtils {
     }
 }
 window.ScraperUtils = ScraperUtils;
+if (typeof module !== 'undefined' && module.exports) { module.exports = ScraperUtils; }
