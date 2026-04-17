@@ -23,8 +23,12 @@ class ContentExporter {
 
     assembleExport(content) {
         // Create a temporary container to process the content
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(content, 'text/html');
         const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = content;
+        Array.from(doc.body.childNodes).forEach(node => {
+            tempDiv.appendChild(node);
+        });
 
         // Sanitize all iframes in the content
         tempDiv.querySelectorAll('iframe').forEach(iframe => {
@@ -119,3 +123,6 @@ class ContentExporter {
     }
 }
 window.ContentExporter = ContentExporter;
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = ContentExporter;
+}
