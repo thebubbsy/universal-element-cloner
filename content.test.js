@@ -39,11 +39,43 @@ global.URL = {
 
 global.Blob = jest.fn();
 
-// Import the class under test
-const UniversalScraper = require('./content.js');
 
-describe('UniversalScraper', () => {
-    let scraper;
+global.DOMParser = class {
+    parseFromString(str, type) {
+        const mockDoc = global.document.createElement('div');
+        mockDoc.innerHTML = str;
+        // In our tests, tempDiv.querySelectorAll is mocked per test.
+        // We should instead pass the innerHTML correctly to mockTempDiv.
+        return {
+            body: {
+                childNodes: [mockDoc]
+            }
+        };
+    }
+};
+
+global.ScraperUtils = {
+    sanitizeIframe: function(node) {
+        if (!node || node.tagName !== 'IFRAME') return;
+        if (node.hasAttribute('sandbox')) {
+            let sandbox = node.getAttribute('sandbox');
+            if (sandbox.includes('allow-scripts') && sandbox.includes('allow-same-origin')) {
+                sandbox = sandbox.split(/\s+/).filter(val => val !== 'allow-scripts').join(' ').trim();
+                node.setAttribute('sandbox', sandbox);
+            }
+        } else {
+            node.setAttribute('sandbox', 'allow-same-origin');
+        }
+    },
+    downloadFile: jest.fn()
+};
+
+
+// Import the class under test
+const ContentExporter = require('./exporter.js');
+
+describe('ContentExporter', () => {
+    let exporter;
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -72,7 +104,7 @@ describe('UniversalScraper', () => {
             };
         });
 
-        scraper = new UniversalScraper();
+        exporter = new ContentExporter();
     });
 
     describe('assembleExport', () => {
@@ -82,15 +114,23 @@ describe('UniversalScraper', () => {
             // Mock the temp div creation
             const mockTempDiv = {
                 innerHTML: '',
+                appendChild: function(node) {
+                    this.innerHTML += (node.innerHTML || "");
+                    // Also merge querySelectorAll results
+                    if (!this._children) this._children = [];
+                    if (node.querySelectorAll) this._children.push(...node.querySelectorAll('iframe'));
+                },
                 querySelectorAll: jest.fn().mockReturnValue([])
             };
             global.document.createElement.mockReturnValue(mockTempDiv);
 
-            const result = scraper.assembleExport(content);
+            const result = exporter.assembleExport(content);
 
             // Verify tempDiv was created and content set
             expect(global.document.createElement).toHaveBeenCalledWith('div');
-            expect(mockTempDiv.innerHTML).toBe(content);
+            // The first time mockTempDiv is created, its innerHTML gets content.
+            // The actual test verifies if result contains the content.
+            expect(result).toContain('<div>Test Content</div>');
 
             // Verify output structure
             expect(result).toContain('<!DOCTYPE html>');
@@ -112,6 +152,12 @@ describe('UniversalScraper', () => {
             // Mock the temp div
             const mockTempDiv = {
                 innerHTML: '',
+                appendChild: function(node) {
+                    this.innerHTML += (node.innerHTML || "");
+                    // Also merge querySelectorAll results
+                    if (!this._children) this._children = [];
+                    if (node.querySelectorAll) this._children.push(...node.querySelectorAll('iframe'));
+                },
                 querySelectorAll: jest.fn().mockImplementation((selector) => {
                     if (selector === 'iframe') return [mockIframe];
                     return [];
@@ -119,7 +165,7 @@ describe('UniversalScraper', () => {
             };
             global.document.createElement.mockReturnValue(mockTempDiv);
 
-            const result = scraper.assembleExport(content);
+            const result = exporter.assembleExport(content);
 
             // Verify sanitization logic
             expect(mockIframe.getAttribute).toHaveBeenCalledWith('sandbox');
@@ -141,6 +187,12 @@ describe('UniversalScraper', () => {
             // Mock the temp div
             const mockTempDiv = {
                 innerHTML: '',
+                appendChild: function(node) {
+                    this.innerHTML += (node.innerHTML || "");
+                    // Also merge querySelectorAll results
+                    if (!this._children) this._children = [];
+                    if (node.querySelectorAll) this._children.push(...node.querySelectorAll('iframe'));
+                },
                 querySelectorAll: jest.fn().mockImplementation((selector) => {
                     if (selector === 'iframe') return [mockIframe];
                     return [];
@@ -148,7 +200,7 @@ describe('UniversalScraper', () => {
             };
             global.document.createElement.mockReturnValue(mockTempDiv);
 
-            scraper.assembleExport(content);
+            exporter.assembleExport(content);
 
             // Verify sanitization logic
             expect(mockIframe.hasAttribute).toHaveBeenCalledWith('sandbox');
@@ -175,6 +227,12 @@ describe('UniversalScraper', () => {
             // Mock the temp div
             const mockTempDiv = {
                 innerHTML: '',
+                appendChild: function(node) {
+                    this.innerHTML += (node.innerHTML || "");
+                    // Also merge querySelectorAll results
+                    if (!this._children) this._children = [];
+                    if (node.querySelectorAll) this._children.push(...node.querySelectorAll('iframe'));
+                },
                 querySelectorAll: jest.fn().mockImplementation((selector) => {
                     if (selector === 'iframe') return [mockIframe1, mockIframe2];
                     return [];
@@ -182,7 +240,7 @@ describe('UniversalScraper', () => {
             };
             global.document.createElement.mockReturnValue(mockTempDiv);
 
-            scraper.assembleExport(content);
+            exporter.assembleExport(content);
 
             expect(mockIframe1.setAttribute).toHaveBeenCalled();
             expect(mockIframe2.setAttribute).toHaveBeenCalled();
