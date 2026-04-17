@@ -23,6 +23,8 @@ class ScraperUtils {
     ];
 
     static generateHash(el) {
+        if (el.dataset && el.dataset.mbHash) return el.dataset.mbHash;
+
         // Precise fingerprint: Text content + ID + ClassName + Attributes + Child Tags
         const text = el.textContent?.substring(0, 200) || "";
         const id = el.id || "";
@@ -39,7 +41,12 @@ class ScraperUtils {
         for (let i = 0; i < raw.length; i++) {
             hash = (hash * 33) ^ raw.charCodeAt(i);
         }
-        return hash.toString(16);
+
+        const finalHash = hash.toString(16);
+        if (el.dataset) {
+            el.dataset.mbHash = finalHash;
+        }
+        return finalHash;
     }
 
     static sanitizeIframe(node) {
