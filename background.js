@@ -3,8 +3,6 @@
  * Handles Side Panel orchestration and global state persistence.
  */
 
-console.log('Universal Element Cloner: Background Service Worker Loaded');
-
 chrome.sidePanel
     .setPanelBehavior({ openPanelOnActionClick: true })
     .catch((error) => console.error(error));
