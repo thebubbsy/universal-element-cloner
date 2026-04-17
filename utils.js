@@ -56,12 +56,10 @@ class ScraperUtils {
                     .join(' ')
                     .trim();
                 node.setAttribute('sandbox', sandbox);
-                console.log('Sanitized iframe sandbox to prevent security error: removed allow-scripts.');
             }
         } else {
             // If no sandbox attribute, add a restrictive one
             node.setAttribute('sandbox', 'allow-same-origin');
-            console.log('Sanitized iframe: added allow-same-origin sandbox attribute.');
         }
     }
 
